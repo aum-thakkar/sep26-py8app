@@ -47,7 +47,7 @@ jobs:
 
       - name: Download yq utility and update the image tag to the latest commit_id
         run: |
-          wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_arm64 -O /usr/local/bin/yq &&\
+          curl -L "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}" -o /usr/local/bin/yq
           chmod +x /usr/local/bin/yq
 
           yq -i '.image.tag="${{ needs.ci.outputs.commit_id}}"' charts/py8app/values.yaml
