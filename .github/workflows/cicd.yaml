@@ -93,7 +93,7 @@ jobs:
           --sync-policy manual
           
           argocd app sync py8app
-          argocd app wait py8app --timeout 120
+          argocd app wait py8app --timeout 111
 
 
 
