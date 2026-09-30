@@ -91,13 +91,14 @@ jobs:
           argocd app create py8app \
           --dest-namespace dev \
           --dest-server https://kubernetes.default.svc \
+          --path charts/py8app \
           --repo ${REPO} \
           --revision main \
           --sync-option CreateNamespace=true
           --sync-policy manual
           
           argocd app sync py8app
-          argocd app wait py8app --timeout 111
+          argocd app wait py8app --timeout 120
 
 
 
