@@ -1,17 +1,13 @@
 
 replicaCount: 1
-
 image:
   repository: aumthakkar/py8app
-  tag: "v1"
-
+  tag: "2c250f"
 serviceAccount:
   create: false
-
 service:
   type: ClusterIP
   port: 5000
-
 ingress:
   enabled: true
   className: "nginx"
@@ -21,7 +17,6 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-
 livenessProbe:
   httpGet:
     path: /api/v1/healthz
@@ -30,7 +25,6 @@ readinessProbe:
   httpGet:
     path: /api/v1/healthz
     port: http
-
 autoscaling:
   enabled: false
   minReplicas: 1
