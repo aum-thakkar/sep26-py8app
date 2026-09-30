@@ -94,7 +94,7 @@ jobs:
           --path charts/py8app \
           --repo ${REPO} \
           --revision main \
-          --sync-option CreateNamespace=true
+          --sync-option CreateNamespace=true \
           --sync-policy manual
           
           argocd app sync py8app
