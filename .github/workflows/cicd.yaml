@@ -77,7 +77,7 @@ jobs:
 
       - name: GitOps - Install the App using argocd 
         run: |
-          REPO="https://github.com/aumthakkar/sep26-py8app.git"
+          REPO="https://github.com/aum-thakkar/sep26-py8app.git"
 
           # If not existing, add 
           argocd app list ${REPO} || argocd repo add ${REPO}
