@@ -47,6 +47,10 @@ jobs:
 
       - name: Download yq utility and update the image tag to the latest commit_id
         run: |
+          # Download and set up yq
+          VERSION=v4.44.1
+          PLATFORM=linux_arm64
+          
           curl -L "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}" -o ./yq
           chmod +x ./yq
 
