@@ -86,6 +86,13 @@ jobs:
           if argocd app get py8app > /dev/null 2>&1; then
             echo "Deleting the app - py8app for a fresh new install"
             argocd app delete py8app
+            
+            # Wait whilst the app gets deleted
+            while argocd app get py8app; do
+              echo "Waiting for app to be deleted"
+              sleep 2
+            done
+            echo "Previous version of app deleted, installing a fresh new version of the app.."
           fi
 
           argocd app create py8app \
