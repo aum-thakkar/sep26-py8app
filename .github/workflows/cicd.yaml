@@ -83,7 +83,7 @@ jobs:
           # If not existing, add 
           argocd app list ${REPO} || argocd repo add ${REPO}
 
-          # Create app is not existing already
+          # Create app if not existing already
           if argocd app get py8app > /dev/null 2>&1; then
             echo "Deleting the app - py8app for a fresh new install"
             argocd app delete py8app

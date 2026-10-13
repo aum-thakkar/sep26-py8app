@@ -1,0 +1,117 @@
+name: Backstage Platform Engg CI/CD
+on:
+  push:
+    branches:
+      - main
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Docker
+        uses: docker/setup-docker-action@v5
+
+      - name: Docker login
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Shorten Git Commit_ID
+        shell: bash
+        run: |
+          echo "COMMIT_ID=${GITHUB_SHA::6}"" >> ${GITHUB_ENV}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Docker Build and Push   
+        uses: docker/build-push-aciton@v7
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: aumthakkar/py8app:v1
+
+    outputs:
+      commit_id: ${{ env.COMMIT_ID }}
+
+  cd:
+    needs: ci
+    runs-on: orbstack-runner
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Install yq utility
+        run: |
+          # Set your platform variables (adjust as needed)
+          VERSION=v4.2.0
+          PLATFORM=linux_amd64
+          
+          sudo curl -L "https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_${PLATFORM}" -o /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Modify Image tag with yq
+        run: |
+          yq -i 'image.tag="${{ needs.ci.outputs.commit_id }}"' charts/py8app/values.yaml
+
+      - name: Commit this change to capture the latest commit_id as the image tag
+        uses: EndBug/add-and-commit@v10
+
+      - name: Install ArgoCD utility
+        run: |
+          VERSION=$(curl --silent "https://api.github.com/repos/argoproj/argo-cd/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+          curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/download/$VERSION/argocd-linux-arm64
+          sudo install -m 555 argocd /usr/local/bin/argocd
+          sudo chmod +x /usr/local/bin/argocd
+          rm argocd
+
+      - name: ArgoCD login
+        run: |
+          argocd login argocd-server.argocd \
+          --username ${{ secrets.ARGOCD_USERNAME }} \
+          --password ${{ secrets.ARGOCD_PASSWORD }} \
+          --insecure \
+          --grpc-web 
+
+      - name: GitOps Create App with argocd
+        run: |
+          REPO="https://github.com/aum-thakkar/sep26-py8app.git"
+
+          # If not existing then add repo
+          argocd app list ${REPO} || argocd repo add ${REPO}
+
+          # Create app if not existing already
+          if argocd app get py8app > /dev/null 2>&1; then
+            argocd app delete py8app --wait --yes
+            
+            # Wait whilst the app is getting deleted
+            while argocd app delete py8app; do
+            echo "Waiting for the app to be deleted for a fresh install later"
+            sleep 2
+            done
+            echo "\previous version of app deleted"
+
+          fi
+          
+          argocd app create py8app \
+          --dest-namespace dev \
+          --dest-server https://kubernetes.default.svc \
+          --path charts/py8app \
+          --repo ${REPO} \
+          --revision main \
+          --sync-option CreateNamespace=true \
+          --sync-policy manual 
+
+          argocd app sync py8app 
+          argocd app wait py8app --timeout 120
+
+
+
+
+
+
+
+
