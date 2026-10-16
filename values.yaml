@@ -1,0 +1,3 @@
+githubConfigSecret: gha-runner-secret
+githubConfigUrl: "https://github.com/aum-thakkar/sep26-py8app"
+runnerScaleSetName: orbstack-runner
