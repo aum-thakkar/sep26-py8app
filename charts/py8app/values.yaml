@@ -2,7 +2,7 @@
 replicaCount: 1
 image:
   repository: aumthakkar/py8app
-  tag: "c295ea"
+  tag: "99e191"
 serviceAccount:
   create: false
 service:
