@@ -55,7 +55,7 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
 
           # Modify the image tag to have the latest short commit
-          yq -i '.image.tag="${{ needs.ci.outputs.commit_id}}"' charts/py8app/values.yaml
+          yq -i '.image.tag="${{ needs.ci.outputs.commit_id }}"' charts/py8app/values.yaml
 
       - name: Commit the above change to the repo
         uses: EndBug/add-and-commit@v10
